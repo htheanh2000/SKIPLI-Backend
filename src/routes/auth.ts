@@ -49,12 +49,14 @@ router.post("/login", async (req, res) => {
     }
   });
 
-  router.post("/save-phone-number", async (req, res) => {
-    const { phoneNumber } = req.body;
+  router.post("/CreateNewAccessCode", async (req, res) => {
+    const { user } = req.body;
     const accessCode = Math.floor(100000 + Math.random() * 900000);
   
     try {
-        const docRef = db.collection('users').doc(phoneNumber);
+      console.log(user, accessCode);
+        
+        const docRef = db.collection('users').doc(user);
         await docRef.set({
             accessCode
         })
@@ -64,23 +66,25 @@ router.post("/login", async (req, res) => {
     }
   });
 
-  router.post("/valid-access-code", async (req, res) => {
-    const { phoneNumber, accessCode } = req.body;
+  router.post("/ValidateAccessCode", async (req, res) => {
+    const { user, accessCode } = req.body;
   
     try {
-        console.log("hello");
-        
-        const userRef  = db.collection(`users`).doc(phoneNumber)
+        const userRef  = db.collection(`users`).doc(user)
         const doc = await userRef.get();
         if (!doc.exists) {
             res.status(201).send({ message: "Can not find this phone number." });
         } else {
             const data = doc.data()
             if(data?.accessCode === accessCode) {
+                const docRef = db.collection('users').doc(user);
+                await docRef.set({
+                    accessCode: ''
+                })
                 res.status(200).send({ message: "Successfully" });
             }
             else {
-                res.status(200).send({ message: "Invalid access code" });
+                res.status(400).send({ message: "Invalid access code" });
             }
         }
     } catch (error) {
