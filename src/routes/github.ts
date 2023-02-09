@@ -25,8 +25,6 @@ router.get("/searchGithubUsers", async (req, res) => {
             ...response.data,
             items: newItems
         };
-
-        console.log(merged);
         res.json(merged);
     } catch (error) {
       res.status(400).send({ error });
@@ -39,16 +37,13 @@ router.get("/searchGithubUsers", async (req, res) => {
         const favoriteRef = db.collection(`/users`).doc(user);
         const userData = (await favoriteRef.get()).data()
         let response 
-        console.log(userData)
         if(await checkLiked(user, github_user_id)) {
             // remove the user from array
-            console.log('remove user from array')
             response = await favoriteRef.update({
                 githubUserId: firestore.FieldValue.arrayRemove(github_user_id)
             });
         }
         else {
-            console.log('update user from array')
             response = await favoriteRef.update({
                 githubUserId: firestore.FieldValue.arrayUnion(github_user_id)
             });
